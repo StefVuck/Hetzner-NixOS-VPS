@@ -1,0 +1,56 @@
+# Secrets - NEVER commit these files
+secrets.nix
+
+# Hardware-specific configuration (unique per machine)
+# This is auto-generated on each VPS
+hardware-configuration.nix
+
+# Nix build artifacts
+result
+result-*
+*.drv
+/result
+
+# Flakes development environment
+.direnv/
+.envrc
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary and log files
+*.log
+*.tmp
+*.bak
+
+# Python cache (if using Python tools)
+__pycache__/
+*.pyc
+
+# Node modules (if building locally)
+node_modules/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+##############################
+# IMPORTANT NOTE:
+# DO NOT add flake.lock to .gitignore!
+# It MUST be committed for reproducibility
+##############################
