@@ -10,10 +10,11 @@ in
     ./modules/networking-simple.nix
     ./modules/web-services.nix
     ./modules/monitoring.nix
+    ./modules/comin.nix
   ];
 
   # System basics
-  system.stateVersion = "24.05";
+  system.stateVersion = "24.11";
 
   # Boot loader
   boot.loader.grub = {
@@ -50,7 +51,7 @@ in
     curl
     wget
     bun
-    nodejs
+    nodejs_22
     python3
     python3Packages.pip
     python3Packages.virtualenv

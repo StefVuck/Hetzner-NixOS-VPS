@@ -205,16 +205,21 @@ in
     "d /var/lib/promtail 0755 promtail promtail -"
   ];
 
-  # Download popular dashboards on system activation
+  # Download dashboards on system activation
   system.activationScripts.grafanaDashboards = ''
     mkdir -p /var/lib/grafana/dashboards
 
-    # Node Exporter Full (Dashboard ID: 1860)
+    # Node Exporter Full (Dashboard ID: 1860) - System metrics
     if [ ! -f /var/lib/grafana/dashboards/node-exporter-full.json ]; then
       ${pkgs.curl}/bin/curl -s https://grafana.com/api/dashboards/1860/revisions/37/download -o /var/lib/grafana/dashboards/node-exporter-full.json
     fi
 
-    # Simple Loki Dashboard (custom)
+    # Nginx Metrics (Dashboard ID: 12708) - Nginx performance metrics
+    if [ ! -f /var/lib/grafana/dashboards/nginx-metrics.json ]; then
+      ${pkgs.curl}/bin/curl -s https://grafana.com/api/dashboards/12708/revisions/1/download -o /var/lib/grafana/dashboards/nginx-metrics.json
+    fi
+
+    # Service Logs Dashboard - Multi-panel view for all services
     cat > /var/lib/grafana/dashboards/simple-loki-logs.json << 'EOF'
 {
   "annotations": {"list": []},
@@ -227,7 +232,7 @@ in
   "panels": [
     {
       "datasource": {"type": "loki", "uid": "Loki"},
-      "gridPos": {"h": 20, "w": 24, "x": 0, "y": 0},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
       "id": 1,
       "options": {
         "dedupStrategy": "none",
@@ -239,38 +244,115 @@ in
         "sortOrder": "Descending",
         "wrapLogMessage": false
       },
-      "targets": [
-        {
-          "datasource": {"type": "loki", "uid": "Loki"},
-          "editorMode": "code",
-          "expr": "{job=~\".+\"}",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "All Logs",
+      "targets": [{"datasource": {"type": "loki", "uid": "Loki"}, "editorMode": "code", "expr": "{job=\"nginx\"}", "queryType": "range", "refId": "A"}],
+      "title": "Nginx Access Logs",
+      "type": "logs"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "Loki"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "id": 2,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [{"datasource": {"type": "loki", "uid": "Loki"}, "editorMode": "code", "expr": "{job=\"systemd-journal\", unit=\"nginx.service\"}", "queryType": "range", "refId": "A"}],
+      "title": "Nginx Service Logs",
+      "type": "logs"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "Loki"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "id": 3,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [{"datasource": {"type": "loki", "uid": "Loki"}, "editorMode": "code", "expr": "{job=\"systemd-journal\", unit=\"grafana.service\"}", "queryType": "range", "refId": "A"}],
+      "title": "Grafana Service",
+      "type": "logs"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "Loki"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "id": 4,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [{"datasource": {"type": "loki", "uid": "Loki"}, "editorMode": "code", "expr": "{job=\"systemd-journal\", unit=\"prometheus.service\"}", "queryType": "range", "refId": "A"}],
+      "title": "Prometheus Service",
+      "type": "logs"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "Loki"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "id": 5,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [{"datasource": {"type": "loki", "uid": "Loki"}, "editorMode": "code", "expr": "{job=\"systemd-journal\", unit=\"loki.service\"}", "queryType": "range", "refId": "A"}],
+      "title": "Loki Service",
+      "type": "logs"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "Loki"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "id": 6,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [{"datasource": {"type": "loki", "uid": "Loki"}, "editorMode": "code", "expr": "{job=\"systemd-journal\", unit=\"promtail.service\"}", "queryType": "range", "refId": "A"}],
+      "title": "Promtail Service",
       "type": "logs"
     }
   ],
   "refresh": "10s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["loki", "logs"],
+  "tags": ["loki", "logs", "services"],
   "templating": {"list": []},
   "time": {"from": "now-1h", "to": "now"},
   "timepicker": {},
   "timezone": "",
-  "title": "Simple Loki Logs",
+  "title": "Service Logs",
   "uid": "simple-loki-logs",
   "version": 0,
   "weekStart": ""
 }
 EOF
-
-    # Nginx Metrics (Dashboard ID: 12708) - for future when nginx exporter enabled
-    if [ ! -f /var/lib/grafana/dashboards/nginx-metrics.json ]; then
-      ${pkgs.curl}/bin/curl -s https://grafana.com/api/dashboards/12708/revisions/1/download -o /var/lib/grafana/dashboards/nginx-metrics.json
-    fi
 
     chown -R grafana:grafana /var/lib/grafana/dashboards
     chmod 644 /var/lib/grafana/dashboards/*.json
